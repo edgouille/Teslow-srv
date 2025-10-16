@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Teslow_srv.Domain.Entities
 {

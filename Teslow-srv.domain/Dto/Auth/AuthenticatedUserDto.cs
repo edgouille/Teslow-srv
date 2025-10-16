@@ -1,10 +1,9 @@
-namespace Teslow_srv.Domain.Dto.User
+namespace Teslow_srv.Domain.Dto.Auth
 {
-    public class GetUserDto
+    public class AuthenticatedUserDto
     {
         public Guid Id { get; set; }
         public required string UserName { get; set; }
         public string Role { get; set; } = "User";
-        public DateTime CreatedAt { get; set; }
     }
 }
