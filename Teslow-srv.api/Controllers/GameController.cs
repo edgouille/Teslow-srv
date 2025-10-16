@@ -34,6 +34,7 @@ namespace Teslow_srv.api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ReadGameDto>> Create([FromBody] CreateGameDto dto)
         {
             if (!ModelState.IsValid)
@@ -53,6 +54,7 @@ namespace Teslow_srv.api.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ReadGameDto>> Update(string id, [FromBody] UpdateGameDto dto)
         {
             if (!ModelState.IsValid)
@@ -73,6 +75,7 @@ namespace Teslow_srv.api.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(string id)
         {
             var deleted = await _gameService.DeleteAsync(id);
