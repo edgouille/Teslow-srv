@@ -1,4 +1,5 @@
-﻿using Teslow_srv.Domain.Dto.User;
+using Teslow_srv.Domain.Dto.Auth;
+using Teslow_srv.Domain.Dto.User;
 
 namespace Teslow_srv.Service.Interface
 {
@@ -9,5 +10,6 @@ namespace Teslow_srv.Service.Interface
         Task<GetUserDto> CreateAsync(CreateUserDto dto, CancellationToken ct = default);
         Task<GetUserDto?> UpdateAsync(Guid id, UpdateUserDto dto, CancellationToken ct = default);
         Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
+        Task<AuthenticatedUserDto?> ValidateCredentialsAsync(string userName, string password, CancellationToken ct = default);
     }
 }
