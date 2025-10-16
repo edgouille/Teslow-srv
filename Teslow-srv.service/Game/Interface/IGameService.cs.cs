@@ -7,7 +7,7 @@ using Teslow_srv.Domain.Dto.Game;
 
 namespace Teslow_srv.Service.Game.Interface
 {
-    public class IGameService
+    public interface IGameService
     {
         Task<IEnumerable<ReadGameDto>> GetAllAsync();
         Task<ReadGameDto?> GetByIdAsync(Guid id);
