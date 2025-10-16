@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -5,20 +6,23 @@ namespace Teslow_srv.Domain.Dto.Game
 {
     public class CreateGameDto
     {
-        [Required]
-        [MinLength(2, ErrorMessage = "At least 2 players required")]
-        [MaxLength(4, ErrorMessage = "Maximum 4 players allowed")]
-        public List<string> Users { get; set; } = new();
+        [StringLength(50)]
+        public string? GameId { get; set; }
 
         [Required]
-        public int Score1 { get; set; }
+        public DateTime GameDate { get; set; } = DateTime.UtcNow.Date;
 
         [Required]
-        public int Score2 { get; set; }
+        public int GameDuration { get; set; }
 
         [Required]
-        public TimeSpan Duration { get; set; }
+        public int ScoreRed { get; set; }
 
-        public DateTime Date { get; set; } = DateTime.UtcNow;
+        [Required]
+        public int ScoreBleu { get; set; }
+
+        public List<string>? TableIds { get; set; }
+
+        public List<int>? TeamIds { get; set; }
     }
 }
