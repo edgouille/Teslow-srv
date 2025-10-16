@@ -1,0 +1,107 @@
+## =========================
+## Fichiers et dossiers de build
+## =========================
+bin/
+obj/
+out/
+[Bb]uild/
+[Ll]og/
+[Ll]ogs/
+
+## =========================
+## Fichiers de l'environnement utilisateur
+## =========================
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.rsuser
+
+## =========================
+## Visual Studio
+## =========================
+.vs/
+.vscode/
+.idea/
+*.ncrunchsolution
+*.ncrunchproject
+_ReSharper*/
+[Tt]est[Rr]esult*/
+*.DotSettings.user
+*.resharper
+
+## =========================
+## JetBrains Rider
+## =========================
+.idea/
+*.iml
+
+## =========================
+## Paquets et dépendances
+## =========================
+# Paquets restaurés automatiquement
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+# Dossier global de cache NuGet
+.nuget/
+# Dossier local de cache ou config
+*.nuget.props
+*.nuget.targets
+
+## =========================
+## Logs et fichiers temporaires
+## =========================
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+*.pidb
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+
+## =========================
+## Fichiers secrets / config locaux
+## =========================
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.local.json
+secrets.json
+.env
+.env.*
+
+## =========================
+## Build / publication / artefacts
+## =========================
+publish/
+dist/
+artifacts/
+*.Publish.xml
+*.publishsettings
+
+## =========================
+## Test & coverage
+## =========================
+TestResults/
+*.coverage
+*.coveragexml
+*.trx
+*.testsettings
+
+## =========================
+## Autres IDEs ou systèmes
+## =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## =========================
+## Docker / conteneurisation
+## =========================
+docker-compose.override.yml
+*.pid
+*.seed
