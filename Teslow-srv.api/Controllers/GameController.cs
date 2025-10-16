@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ namespace Teslow_srv.api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ReadGameDto>> GetById(Guid id)
+        public async Task<ActionResult<ReadGameDto>> GetById(string id)
         {
             var game = await _gameService.GetByIdAsync(id);
             if (game == null) return NotFound();
@@ -33,22 +34,46 @@ namespace Teslow_srv.api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ReadGameDto>> Create(CreateGameDto dto)
+        public async Task<ActionResult<ReadGameDto>> Create([FromBody] CreateGameDto dto)
         {
-            var created = await _gameService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            try
+            {
+                var created = await _gameService.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = created.GameId }, created);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ReadGameDto>> Update(Guid id, UpdateGameDto dto)
+        public async Task<ActionResult<ReadGameDto>> Update(string id, [FromBody] UpdateGameDto dto)
         {
-            var updated = await _gameService.UpdateAsync(id, dto);
-            if (updated == null) return NotFound();
-            return Ok(updated);
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            try
+            {
+                var updated = await _gameService.UpdateAsync(id, dto);
+                if (updated == null) return NotFound();
+                return Ok(updated);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(string id)
         {
             var deleted = await _gameService.DeleteAsync(id);
             if (!deleted) return NotFound();

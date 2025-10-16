@@ -1,14 +1,18 @@
+using System;
 using System.Collections.Generic;
 
 namespace Teslow_srv.Domain.Dto.Game
 {
     public class ReadGameDto
     {
-        public Guid Id { get; set; }
-        public List<string> Users { get; set; } = new();
-        public int Score1 { get; set; }
-        public int Score2 { get; set; }
-        public TimeSpan Duration { get; set; }
-        public DateTime Date { get; set; }
+        public string GameId { get; set; } = string.Empty;
+        public DateTime GameDate { get; set; }
+        public int GameDuration { get; set; }
+        public int ScoreRed { get; set; }
+        public int ScoreBleu { get; set; }
+        public List<string> TableIds { get; set; } = new();
+        public List<int> TeamIds { get; set; } = new();
+        public int? ReservationId { get; set; }
+        public string? ReservationStatus { get; set; }
     }
 }

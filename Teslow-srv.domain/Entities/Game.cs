@@ -1,32 +1,34 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Teslow_srv.Domain.Entities
 {
+    [Table("games")]
     public class Game
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        [Column("game_id")]
+        [StringLength(50)]
+        public string GameId { get; set; } = Guid.NewGuid().ToString("N");
 
-        // Entre 2 et 4 joueurs
-        [Required]
-        [MinLength(2)]
-        [MaxLength(4)]
-        public required List<string> Users { get; set; }
+        [Column("game_date")]
+        public DateTime GameDate { get; set; } = DateTime.UtcNow.Date;
 
-        // Scores
-        [Required]
-        public int Score1 { get; set; }
+        [Column("game_duration")]
+        public int GameDuration { get; set; }
 
-        [Required]
-        public int Score2 { get; set; }
+        [Column("score_red")]
+        public int ScoreRed { get; set; }
 
-        // Durée de la partie
-        [Required]
-        public TimeSpan Duration { get; set; }
+        [Column("score_bleu")]
+        public int ScoreBleu { get; set; }
 
-        // Date de la partie
-        [Required]
-        public DateTime Date { get; set; } = DateTime.UtcNow;
+        public ICollection<GameTableAssignment> GameTables { get; set; } = new List<GameTableAssignment>();
+
+        public ICollection<GameTeam> GameTeams { get; set; } = new List<GameTeam>();
+
+        public Reservation? Reservation { get; set; }
     }
 }

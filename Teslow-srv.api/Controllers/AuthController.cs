@@ -1,8 +1,10 @@
+using System;
 using System.Threading;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Teslow_srv.Api.Services;
 using Teslow_srv.Domain.Dto.Auth;
+using Teslow_srv.Domain.Dto.User;
 using Teslow_srv.Service.Interface;
 
 namespace Teslow_srv.api.Controllers
@@ -37,6 +39,39 @@ namespace Teslow_srv.api.Controllers
 
             var response = _tokenService.GenerateToken(user);
             return Ok(response);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public async Task<ActionResult<LoginResponseDto>> Register([FromBody] RegisterRequestDto request, CancellationToken ct)
+        {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            try
+            {
+                var createdUser = await _userService.CreateAsync(new CreateUserDto
+                {
+                    UserName = request.UserName,
+                    Password = request.Password,
+                    Role = string.IsNullOrWhiteSpace(request.Role) ? "User" : request.Role.Trim()
+                }, ct);
+
+                var token = _tokenService.GenerateToken(new AuthenticatedUserDto
+                {
+                    Id = createdUser.Id,
+                    UserName = createdUser.UserName,
+                    Role = createdUser.Role
+                });
+
+                return Ok(token);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
