@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Teslow_srv.domain.Entities
+﻿namespace Teslow_srv.Domain.Entities
 {
     public class User
     {
         public Guid Id { get; set; }
         public string UserName { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

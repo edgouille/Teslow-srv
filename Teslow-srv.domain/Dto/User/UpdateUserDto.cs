@@ -1,4 +1,4 @@
-﻿namespace Teslow_srv.domain.Dto.User
+﻿namespace Teslow_srv.Domain.Dto.User
 {
     public class UpdateUserDto
     {
