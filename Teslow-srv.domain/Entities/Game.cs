@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Teslow_srv.Domain.Entities
 {
@@ -12,11 +7,11 @@ namespace Teslow_srv.Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        // Between 2 and 4 players
+        // Entre 2 et 4 joueurs
         [Required]
         [MinLength(2)]
         [MaxLength(4)]
-        public List<string> Users { get; set; } = new();
+        public required List<string> Users { get; set; }
 
         // Scores
         [Required]
@@ -25,11 +20,11 @@ namespace Teslow_srv.Domain.Entities
         [Required]
         public int Score2 { get; set; }
 
-        // Duration of the game (e.g., 00:30:00 for 30 minutes)
+        // Durée de la partie
         [Required]
         public TimeSpan Duration { get; set; }
 
-        // Date when the game took place
+        // Date de la partie
         [Required]
         public DateTime Date { get; set; } = DateTime.UtcNow;
     }

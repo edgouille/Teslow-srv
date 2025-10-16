@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Teslow_srv.Service.Game.Interface;
 using Teslow_srv.Domain.Dto.Game;
+using Teslow_srv.Service.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 

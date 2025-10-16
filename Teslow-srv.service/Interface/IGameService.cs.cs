@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Teslow_srv.Domain.Dto.Game;
 
-namespace Teslow_srv.Service.Game.Interface
+namespace Teslow_srv.Service.Interface
 {
     public interface IGameService
     {

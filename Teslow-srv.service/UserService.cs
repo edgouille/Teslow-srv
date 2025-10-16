@@ -1,11 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 using Teslow_srv.Domain.Dto.User;
 using Teslow_srv.Domain.Entities;
 using Teslow_srv.Infrastructure.Data;
-using Teslow_srv.service.User;
+using Teslow_srv.Service.Interface;
 
-namespace Teslow_srv.Application.Users
+namespace Teslow_srv.Service
 {
     public class UserService : IUserService
     {

@@ -1,6 +1,6 @@
 ﻿using Teslow_srv.Domain.Dto.User;
 
-namespace Teslow_srv.service.User
+namespace Teslow_srv.Service.Interface
 {
     public interface IUserService
     {
