@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36603.0 d17.14
+VisualStudioVersion = 17.14.36603.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Teslow-srv.api", "Teslow-srv.api\Teslow-srv.api.csproj", "{D27C4CE2-D8A2-493B-819C-A4EC08C909A2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Teslow-srv.Api", "Teslow-srv.api\Teslow-srv.Api.csproj", "{D27C4CE2-D8A2-493B-819C-A4EC08C909A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Teslow-srv.service", "Teslow-srv.service\Teslow-srv.service.csproj", "{8B36BC66-FBC5-4D49-821F-20543E75CF5B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Teslow-srv.Service", "Teslow-srv.service\Teslow-srv.Service.csproj", "{8B36BC66-FBC5-4D49-821F-20543E75CF5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Teslow-srv.domain", "Teslow-srv.domain\Teslow-srv.domain.csproj", "{A5F86526-E222-4931-A476-D2F935ACE776}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Teslow-srv.Domain", "Teslow-srv.domain\Teslow-srv.Domain.csproj", "{A5F86526-E222-4931-A476-D2F935ACE776}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Éléments de solution", "Éléments de solution", "{9C8CB701-102D-CF49-A3E0-89AC09D42C2C}"
 	ProjectSection(SolutionItems) = preProject

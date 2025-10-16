@@ -1,6 +1,6 @@
 ﻿namespace Teslow_srv.domain.Dto.User
 {
-    public class CreateUserDto
+    public class GetUserDto
     {
         public Guid Id { get; set; }
         public string UserName { get; set; }

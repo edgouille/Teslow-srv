@@ -2,9 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>Teslow_srv.service</RootNamespace>
+    <RootNamespace>Teslow_srv.Service</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Teslow-srv.domain\Teslow-srv.Domain.csproj" />
+  </ItemGroup>
 
 </Project>
