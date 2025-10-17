@@ -41,7 +41,7 @@ namespace Teslow_srv.api.Controllers
             return Ok(response);
         }
 
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpPost("register")]
         public async Task<ActionResult<LoginResponseDto>> Register([FromBody] RegisterRequestDto request, CancellationToken ct)
         {
@@ -56,7 +56,7 @@ namespace Teslow_srv.api.Controllers
                 {
                     UserName = request.UserName,
                     Password = request.Password,
-                    Role = "User"
+                    Role = request.Role
                 }, ct);
 
                 var token = _tokenService.GenerateToken(new AuthenticatedUserDto
