@@ -7,8 +7,7 @@ ENV MARIADB_DATABASE=teslow_db
 ENV MARIADB_USER=teslow_user
 ENV MARIADB_PASSWORD=teslow_pass
 
-# Copie des scripts d'init SQL (exécutés automatiquement à la 1ère initialisation)
-# Place tes .sql dans ./initdb/ à côté de ce Dockerfile
+## vérifier que initsql est à la racine
 COPY init.sql /docker-entrypoint-initdb.d/
 
 EXPOSE 3306
