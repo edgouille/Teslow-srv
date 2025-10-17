@@ -1,19 +1,23 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Teslow_srv.Domain.Entities
 {
-    [Table("teams_players")]
+    [Table("TeamPlayers")]
     public class TeamPlayer
     {
-        [Column("user_id")]
+        [Key]
+        public Guid Id { get; set; } = Guid.NewGuid();
+
+        [Required]
+        public Guid TeamId { get; set; }
+
+        public GameTeam Team { get; set; } = null!;
+
+        [Required]
         public Guid UserId { get; set; }
 
         public User User { get; set; } = null!;
-
-        [Column("team_id")]
-        public int TeamId { get; set; }
-
-        public TeamMembership Team { get; set; } = null!;
     }
 }
