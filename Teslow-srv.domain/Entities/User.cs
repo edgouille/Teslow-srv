@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Teslow_srv.Domain.Entities
@@ -11,6 +12,15 @@ namespace Teslow_srv.Domain.Entities
         [MaxLength(100)]
         public required string UserName { get; set; }
 
+        [MaxLength(100)]
+        public string? DisplayName { get; set; }
+
+        [MaxLength(100)]
+        public string? CanonicalName { get; set; }
+
+        [Range(0, 150)]
+        public int? Age { get; set; }
+
         [Required]
         [MaxLength(256)]
         public required string PasswordHash { get; set; }
@@ -21,5 +31,7 @@ namespace Teslow_srv.Domain.Entities
 
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public ICollection<TeamPlayer> TeamPlayers { get; set; } = new List<TeamPlayer>();
     }
 }

@@ -12,7 +12,6 @@ namespace Teslow_srv.Infrastructure.Data
 
         public DbSet<User> Users => Set<User>();
         public DbSet<Game> Games => Set<Game>();
-        public DbSet<Player> Players => Set<Player>();
         public DbSet<TeamMembership> TeamMemberships => Set<TeamMembership>();
         public DbSet<GameTable> GameTables => Set<GameTable>();
         public DbSet<Reservation> Reservations => Set<Reservation>();
@@ -24,6 +23,14 @@ namespace Teslow_srv.Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(u => u.Id);
+                entity.Property(u => u.UserName).HasMaxLength(100);
+                entity.Property(u => u.DisplayName).HasMaxLength(100);
+                entity.Property(u => u.CanonicalName).HasMaxLength(100);
+            });
+
             modelBuilder.Entity<Game>(entity =>
             {
                 entity.HasKey(g => g.GameId);
@@ -32,14 +39,6 @@ namespace Teslow_srv.Infrastructure.Data
                 entity.Property(g => g.ScoreBleu).IsRequired();
                 entity.Property(g => g.GameDuration).IsRequired();
                 entity.Property(g => g.GameDate).IsRequired();
-            });
-
-            modelBuilder.Entity<Player>(entity =>
-            {
-                entity.HasKey(p => p.PlayerId);
-                entity.Property(p => p.PlayerId).HasMaxLength(50);
-                entity.Property(p => p.PlayerName).HasMaxLength(50);
-                entity.Property(p => p.PlayerCanonicalName).HasMaxLength(100);
             });
 
             modelBuilder.Entity<TeamMembership>(entity =>
@@ -103,13 +102,11 @@ namespace Teslow_srv.Infrastructure.Data
 
             modelBuilder.Entity<TeamPlayer>(entity =>
             {
-                entity.HasKey(tp => new { tp.PlayerId, tp.TeamId });
+                entity.HasKey(tp => new { tp.UserId, tp.TeamId });
 
-                entity.Property(tp => tp.PlayerId).HasMaxLength(50);
-
-                entity.HasOne(tp => tp.Player)
-                    .WithMany(p => p.TeamPlayers)
-                    .HasForeignKey(tp => tp.PlayerId)
+                entity.HasOne(tp => tp.User)
+                    .WithMany(u => u.TeamPlayers)
+                    .HasForeignKey(tp => tp.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(tp => tp.Team)
