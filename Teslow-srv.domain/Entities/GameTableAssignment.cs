@@ -1,17 +1,22 @@
+using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Teslow_srv.Domain.Entities
 {
-    [Table("games_tables")]
+    [Table("GameTableAssignments")]
     public class GameTableAssignment
     {
-        [Column("game_id")]
-        public string GameId { get; set; } = null!;
+        [Key]
+        public Guid Id { get; set; } = Guid.NewGuid();
 
-        public Game Game { get; set; } = null!;
+        [Required]
+        public Guid ReservationId { get; set; }
 
-        [Column("game_table_id")]
-        public string GameTableId { get; set; } = null!;
+        public Reservation Reservation { get; set; } = null!;
+
+        [Required]
+        public Guid GameTableId { get; set; }
 
         public GameTable GameTable { get; set; } = null!;
     }

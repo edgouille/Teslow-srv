@@ -1,25 +1,24 @@
-using System.Collections.Generic;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Teslow_srv.Domain.Entities
 {
-    [Table("team_memberships")]
+    [Table("TeamMemberships")]
     public class TeamMembership
     {
         [Key]
-        [Column("team_id")]
-        public int TeamId { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
-        [Column("team_color")]
-        [StringLength(50)]
-        public string TeamColor { get; set; } = string.Empty;
+        [Required]
+        public Guid TeamId { get; set; }
 
-        [Column("player_goals")]
-        public int PlayerGoals { get; set; }
+        [Required]
+        public Guid UserId { get; set; }
 
-        public ICollection<GameTeam> GameTeams { get; set; } = new List<GameTeam>();
+        public User User { get; set; } = null!;
 
-        public ICollection<TeamPlayer> TeamPlayers { get; set; } = new List<TeamPlayer>();
+        [Required]
+        public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
     }
 }

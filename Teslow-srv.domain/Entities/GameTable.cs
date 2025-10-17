@@ -5,14 +5,22 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Teslow_srv.Domain.Entities
 {
-    [Table("tables")]
+    [Table("GameTables")]
     public class GameTable
     {
         [Key]
-        [Column("game_table_id")]
-        [StringLength(50)]
-        public string GameTableId { get; set; } = Guid.NewGuid().ToString("N");
+        public Guid Id { get; set; } = Guid.NewGuid();
 
-        public ICollection<GameTableAssignment> GameAssignments { get; set; } = new List<GameTableAssignment>();
+        [Required]
+        [MaxLength(100)]
+        public required string Name { get; set; }
+
+        [MaxLength(200)]
+        public string? Location { get; set; }
+
+        [Required]
+        public bool IsActive { get; set; } = true;
+
+        public ICollection<GameTableAssignment> Assignments { get; set; } = new List<GameTableAssignment>();
     }
 }

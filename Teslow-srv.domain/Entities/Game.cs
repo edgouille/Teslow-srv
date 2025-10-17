@@ -5,30 +5,24 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Teslow_srv.Domain.Entities
 {
-    [Table("games")]
+    [Table("Games")]
     public class Game
     {
         [Key]
-        [Column("game_id")]
-        [StringLength(50)]
-        public string GameId { get; set; } = Guid.NewGuid().ToString("N");
+        public Guid Id { get; set; } = Guid.NewGuid();
 
-        [Column("game_date")]
-        public DateTime GameDate { get; set; } = DateTime.UtcNow.Date;
+        [Required]
+        public int Score1 { get; set; }
 
-        [Column("game_duration")]
-        public int GameDuration { get; set; }
+        [Required]
+        public int Score2 { get; set; }
 
-        [Column("score_red")]
-        public int ScoreRed { get; set; }
+        [Required]
+        public int DurationSeconds { get; set; }
 
-        [Column("score_bleu")]
-        public int ScoreBleu { get; set; }
+        [Required]
+        public DateTime Date { get; set; } = DateTime.UtcNow;
 
-        public ICollection<GameTableAssignment> GameTables { get; set; } = new List<GameTableAssignment>();
-
-        public ICollection<GameTeam> GameTeams { get; set; } = new List<GameTeam>();
-
-        public Reservation? Reservation { get; set; }
+        public ICollection<GameTeam> Teams { get; set; } = new List<GameTeam>();
     }
 }
