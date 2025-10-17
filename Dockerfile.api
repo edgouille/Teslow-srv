@@ -1,0 +1,24 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+COPY ["Teslow-srv.sln", "./"]
+COPY ["Teslow-srv.Api/Teslow-srv.Api.csproj", "Teslow-srv.Api/"]
+COPY ["Teslow-srv.Domain/Teslow-srv.Domain.csproj", "Teslow-srv.Domain/"]
+COPY ["Teslow-srv.Infrastructure/Teslow-srv.Infrastructure.csproj", "Teslow-srv.Infrastructure/"]
+COPY ["Teslow-srv.Service/Teslow-srv.Service.csproj", "Teslow-srv.Service/"]
+
+RUN dotnet restore "Teslow-srv.Api/Teslow-srv.Api.csproj"
+
+COPY . .
+
+RUN dotnet publish "Teslow-srv.Api/Teslow-srv.Api.csproj" -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+
+ENV ASPNETCORE_URLS=https://+:8080
+EXPOSE 8080
+
+COPY --from=build /app/publish .
+
+ENTRYPOINT ["dotnet", "Teslow-srv.Api.dll"]
