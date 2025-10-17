@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Teslow_srv.Domain.Dto.Game;
 using Teslow_srv.Domain.Entities;
@@ -18,253 +20,120 @@ namespace Teslow_srv.Service
             _db = db;
         }
 
-        public async Task<IEnumerable<ReadGameDto>> GetAllAsync()
+        public async Task<IEnumerable<ReadGameDto>> GetAllAsync(CancellationToken ct = default)
         {
             var games = await _db.Games
                 .AsNoTracking()
-                .Include(g => g.GameTables)
-                .Include(g => g.GameTeams)
-                .Include(g => g.Reservation)
-                .ToListAsync();
+                .OrderByDescending(g => g.Date)
+                .ToListAsync(ct);
 
             return games.Select(MapToReadDto);
         }
 
-        public async Task<ReadGameDto?> GetByIdAsync(string id)
+        public async Task<ReadGameDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                return null;
-            }
-
-            var normalizedId = id.Trim();
-
             var game = await _db.Games
                 .AsNoTracking()
-                .Include(g => g.GameTables)
-                .Include(g => g.GameTeams)
-                .Include(g => g.Reservation)
-                .FirstOrDefaultAsync(g => g.GameId == normalizedId);
+                .FirstOrDefaultAsync(g => g.Id == id, ct);
 
             return game is null ? null : MapToReadDto(game);
         }
 
-        public async Task<ReadGameDto> CreateAsync(CreateGameDto dto)
+        public async Task<ReadGameDto> CreateAsync(CreateGameDto dto, CancellationToken ct = default)
         {
-            if (dto is null)
-            {
-                throw new ArgumentNullException(nameof(dto));
-            }
+            ArgumentNullException.ThrowIfNull(dto);
 
-            var gameId = string.IsNullOrWhiteSpace(dto.GameId) ? Guid.NewGuid().ToString("N") : dto.GameId.Trim();
-
-            if (await _db.Games.AnyAsync(g => g.GameId == gameId))
+            ValidateScores(dto.Score1, dto.Score2);
+            if (dto.DurationSeconds < 0)
             {
-                throw new ArgumentException($"A game with id '{gameId}' already exists.");
+                throw new ArgumentException("Duration must be greater than or equal to zero.", nameof(dto));
             }
 
             var game = new Game
             {
-                GameId = gameId,
-                GameDate = dto.GameDate,
-                GameDuration = dto.GameDuration,
-                ScoreRed = dto.ScoreRed,
-                ScoreBleu = dto.ScoreBleu
+                Date = dto.Date,
+                DurationSeconds = dto.DurationSeconds,
+                Score1 = dto.Score1,
+                Score2 = dto.Score2
             };
 
-            await ApplyTableAssignmentsAsync(game, dto.TableIds);
-            await ApplyTeamAssignmentsAsync(game, dto.TeamIds);
-
             _db.Games.Add(game);
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
 
             return MapToReadDto(game);
         }
 
-        public async Task<ReadGameDto?> UpdateAsync(string id, UpdateGameDto dto)
+        public async Task<ReadGameDto?> UpdateAsync(Guid id, UpdateGameDto dto, CancellationToken ct = default)
         {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                return null;
-            }
-
-            var normalizedId = id.Trim();
-
-            var game = await _db.Games
-                .Include(g => g.GameTables)
-                .Include(g => g.GameTeams)
-                .Include(g => g.Reservation)
-                .FirstOrDefaultAsync(g => g.GameId == normalizedId);
-
+            var game = await _db.Games.FirstOrDefaultAsync(g => g.Id == id, ct);
             if (game is null)
             {
                 return null;
             }
 
-            if (dto.GameDate.HasValue)
+            if (dto.Date.HasValue)
             {
-                game.GameDate = dto.GameDate.Value;
+                game.Date = dto.Date.Value;
             }
 
-            if (dto.GameDuration.HasValue)
+            if (dto.DurationSeconds.HasValue)
             {
-                game.GameDuration = dto.GameDuration.Value;
+                if (dto.DurationSeconds.Value < 0)
+                {
+                    throw new ArgumentException("Duration must be greater than or equal to zero.", nameof(dto));
+                }
+
+                game.DurationSeconds = dto.DurationSeconds.Value;
             }
 
-            if (dto.ScoreRed.HasValue)
+            if (dto.Score1.HasValue || dto.Score2.HasValue)
             {
-                game.ScoreRed = dto.ScoreRed.Value;
+                ValidateScores(dto.Score1 ?? game.Score1, dto.Score2 ?? game.Score2);
             }
 
-            if (dto.ScoreBleu.HasValue)
+            if (dto.Score1.HasValue)
             {
-                game.ScoreBleu = dto.ScoreBleu.Value;
+                game.Score1 = dto.Score1.Value;
             }
 
-            if (dto.TableIds is not null)
+            if (dto.Score2.HasValue)
             {
-                await ApplyTableAssignmentsAsync(game, dto.TableIds);
+                game.Score2 = dto.Score2.Value;
             }
 
-            if (dto.TeamIds is not null)
-            {
-                await ApplyTeamAssignmentsAsync(game, dto.TeamIds);
-            }
-
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
 
             return MapToReadDto(game);
         }
 
-        public async Task<bool> DeleteAsync(string id)
+        public async Task<bool> DeleteAsync(Guid id, CancellationToken ct = default)
         {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                return false;
-            }
-
-            var normalizedId = id.Trim();
-
-            var game = await _db.Games.FirstOrDefaultAsync(g => g.GameId == normalizedId);
+            var game = await _db.Games.FirstOrDefaultAsync(g => g.Id == id, ct);
             if (game is null)
             {
                 return false;
             }
 
             _db.Games.Remove(game);
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
             return true;
         }
 
-        private async Task ApplyTableAssignmentsAsync(Game game, IEnumerable<string>? tableIds)
+        private static void ValidateScores(int score1, int score2)
         {
-            if (tableIds is null)
+            if (score1 < 0 || score2 < 0)
             {
-                return;
-            }
-
-            var normalizedIds = tableIds
-                .Where(id => !string.IsNullOrWhiteSpace(id))
-                .Select(id => id.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-            var existingAssignments = game.GameTables.ToList();
-            foreach (var assignment in existingAssignments.Where(a => !normalizedIds.Contains(a.GameTableId)))
-            {
-                game.GameTables.Remove(assignment);
-            }
-
-            if (normalizedIds.Count == 0)
-            {
-                return;
-            }
-
-            var tables = await _db.GameTables
-                .Where(t => normalizedIds.Contains(t.GameTableId))
-                .ToListAsync();
-
-            if (tables.Count != normalizedIds.Count)
-            {
-                var found = tables.Select(t => t.GameTableId).ToHashSet(StringComparer.OrdinalIgnoreCase);
-                var missing = normalizedIds.Where(id => !found.Contains(id));
-                throw new ArgumentException($"Unknown game table id(s): {string.Join(", ", missing)}");
-            }
-
-            var assigned = game.GameTables.Select(gt => gt.GameTableId).ToHashSet(StringComparer.OrdinalIgnoreCase);
-            foreach (var table in tables)
-            {
-                if (!assigned.Contains(table.GameTableId))
-                {
-                    game.GameTables.Add(new GameTableAssignment
-                    {
-                        GameId = game.GameId,
-                        Game = game,
-                        GameTableId = table.GameTableId,
-                        GameTable = table
-                    });
-                }
+                throw new ArgumentException("Scores must be greater than or equal to zero.");
             }
         }
 
-        private async Task ApplyTeamAssignmentsAsync(Game game, IEnumerable<int>? teamIds)
+        private static ReadGameDto MapToReadDto(Game game) => new()
         {
-            if (teamIds is null)
-            {
-                return;
-            }
-
-            var normalizedIds = teamIds.Distinct().ToList();
-
-            var existingAssignments = game.GameTeams.ToList();
-            foreach (var assignment in existingAssignments.Where(a => !normalizedIds.Contains(a.TeamId)))
-            {
-                game.GameTeams.Remove(assignment);
-            }
-
-            if (normalizedIds.Count == 0)
-            {
-                return;
-            }
-
-            var teams = await _db.TeamMemberships
-                .Where(t => normalizedIds.Contains(t.TeamId))
-                .ToListAsync();
-
-            if (teams.Count != normalizedIds.Count)
-            {
-                var found = teams.Select(t => t.TeamId).ToHashSet();
-                var missing = normalizedIds.Where(id => !found.Contains(id));
-                throw new ArgumentException($"Unknown team id(s): {string.Join(", ", missing)}");
-            }
-
-            var assigned = game.GameTeams.Select(gt => gt.TeamId).ToHashSet();
-            foreach (var team in teams)
-            {
-                if (!assigned.Contains(team.TeamId))
-                {
-                    game.GameTeams.Add(new GameTeam
-                    {
-                        GameId = game.GameId,
-                        Game = game,
-                        TeamId = team.TeamId,
-                        Team = team
-                    });
-                }
-            }
-        }
-
-        private static ReadGameDto MapToReadDto(Game g) => new()
-        {
-            GameId = g.GameId,
-            GameDate = g.GameDate,
-            GameDuration = g.GameDuration,
-            ScoreRed = g.ScoreRed,
-            ScoreBleu = g.ScoreBleu,
-            TableIds = g.GameTables.Select(gt => gt.GameTableId).ToList(),
-            TeamIds = g.GameTeams.Select(gt => gt.TeamId).ToList(),
-            ReservationId = g.Reservation?.ReservationId,
-            ReservationStatus = g.Reservation?.Status
+            Id = game.Id,
+            Date = game.Date,
+            DurationSeconds = game.DurationSeconds,
+            Score1 = game.Score1,
+            Score2 = game.Score2
         };
     }
 }

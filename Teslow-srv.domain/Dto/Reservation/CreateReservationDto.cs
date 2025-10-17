@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Teslow_srv.Domain.Dto.Reservation
@@ -5,10 +7,14 @@ namespace Teslow_srv.Domain.Dto.Reservation
     public class CreateReservationDto
     {
         [Required]
-        [StringLength(50)]
-        public string Status { get; set; } = string.Empty;
+        public DateTime StartUtc { get; set; }
 
-        [StringLength(50)]
-        public string? GameId { get; set; }
+        [Range(1, int.MaxValue)]
+        public int DurationSeconds { get; set; }
+
+        [Range(0, byte.MaxValue)]
+        public byte Mode { get; set; }
+
+        public List<Guid>? TableIds { get; set; }
     }
 }

@@ -28,9 +28,9 @@ namespace Teslow_srv.api.Controllers
             return Ok(reservations);
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:guid}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ReadReservationDto>> GetById(int id, CancellationToken ct)
+        public async Task<ActionResult<ReadReservationDto>> GetById(Guid id, CancellationToken ct)
         {
             var reservation = await _reservationService.GetByIdAsync(id, ct);
             return reservation is null ? NotFound() : Ok(reservation);
@@ -47,7 +47,7 @@ namespace Teslow_srv.api.Controllers
             try
             {
                 var created = await _reservationService.CreateAsync(dto, ct);
-                return CreatedAtAction(nameof(GetById), new { id = created.ReservationId }, created);
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
             }
             catch (ArgumentException ex)
             {
@@ -55,9 +55,9 @@ namespace Teslow_srv.api.Controllers
             }
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:guid}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ReadReservationDto>> Update(int id, [FromBody] UpdateReservationDto dto, CancellationToken ct)
+        public async Task<ActionResult<ReadReservationDto>> Update(Guid id, [FromBody] UpdateReservationDto dto, CancellationToken ct)
         {
             if (!ModelState.IsValid)
             {
@@ -75,9 +75,9 @@ namespace Teslow_srv.api.Controllers
             }
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int id, CancellationToken ct)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
             var deleted = await _reservationService.DeleteAsync(id, ct);
             return deleted ? NoContent() : NotFound();

@@ -1,11 +1,20 @@
+using System;
+using System.Collections.Generic;
+
 namespace Teslow_srv.Domain.Dto.Reservation
 {
     public class ReadReservationDto
     {
-        public int ReservationId { get; set; }
+        public Guid Id { get; set; }
 
-        public string Status { get; set; } = string.Empty;
+        public DateTime StartUtc { get; set; }
 
-        public string? GameId { get; set; }
+        public int DurationSeconds { get; set; }
+
+        public byte Mode { get; set; }
+
+        public DateTime CreatedAtUtc { get; set; }
+
+        public List<Guid> TableIds { get; set; } = new();
     }
 }

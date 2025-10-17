@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Teslow_srv.Domain.Dto.Game;
@@ -20,22 +21,22 @@ namespace Teslow_srv.api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReadGameDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<ReadGameDto>>> GetAll(CancellationToken ct)
         {
-            return Ok(await _gameService.GetAllAsync());
+            return Ok(await _gameService.GetAllAsync(ct));
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ReadGameDto>> GetById(string id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<ReadGameDto>> GetById(Guid id, CancellationToken ct)
         {
-            var game = await _gameService.GetByIdAsync(id);
+            var game = await _gameService.GetByIdAsync(id, ct);
             if (game == null) return NotFound();
             return Ok(game);
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ReadGameDto>> Create([FromBody] CreateGameDto dto)
+        public async Task<ActionResult<ReadGameDto>> Create([FromBody] CreateGameDto dto, CancellationToken ct)
         {
             if (!ModelState.IsValid)
             {
@@ -44,8 +45,8 @@ namespace Teslow_srv.api.Controllers
 
             try
             {
-                var created = await _gameService.CreateAsync(dto);
-                return CreatedAtAction(nameof(GetById), new { id = created.GameId }, created);
+                var created = await _gameService.CreateAsync(dto, ct);
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
             }
             catch (ArgumentException ex)
             {
@@ -53,9 +54,9 @@ namespace Teslow_srv.api.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:guid}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ReadGameDto>> Update(string id, [FromBody] UpdateGameDto dto)
+        public async Task<ActionResult<ReadGameDto>> Update(Guid id, [FromBody] UpdateGameDto dto, CancellationToken ct)
         {
             if (!ModelState.IsValid)
             {
@@ -64,7 +65,7 @@ namespace Teslow_srv.api.Controllers
 
             try
             {
-                var updated = await _gameService.UpdateAsync(id, dto);
+                var updated = await _gameService.UpdateAsync(id, dto, ct);
                 if (updated == null) return NotFound();
                 return Ok(updated);
             }
@@ -74,11 +75,11 @@ namespace Teslow_srv.api.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
-            var deleted = await _gameService.DeleteAsync(id);
+            var deleted = await _gameService.DeleteAsync(id, ct);
             if (!deleted) return NotFound();
             return NoContent();
         }

@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Teslow_srv.Domain.Dto.Reservation;
 using Teslow_srv.Domain.Entities;
@@ -19,47 +22,42 @@ namespace Teslow_srv.Service
 
         public async Task<List<ReadReservationDto>> GetAllAsync(CancellationToken ct = default)
         {
-            return await _db.Reservations
+            var reservations = await _db.Reservations
                 .AsNoTracking()
-                .OrderBy(r => r.ReservationId)
-                .Select(r => new ReadReservationDto
-                {
-                    ReservationId = r.ReservationId,
-                    Status = r.Status,
-                    GameId = r.GameId
-                })
+                .Include(r => r.TableAssignments)
+                .OrderBy(r => r.StartUtc)
                 .ToListAsync(ct);
+
+            return reservations.Select(MapToReadDto).ToList();
         }
 
-        public async Task<ReadReservationDto?> GetByIdAsync(int id, CancellationToken ct = default)
+        public async Task<ReadReservationDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
             var reservation = await _db.Reservations
                 .AsNoTracking()
-                .FirstOrDefaultAsync(r => r.ReservationId == id, ct);
+                .Include(r => r.TableAssignments)
+                .FirstOrDefaultAsync(r => r.Id == id, ct);
 
             return reservation is null ? null : MapToReadDto(reservation);
         }
 
         public async Task<ReadReservationDto> CreateAsync(CreateReservationDto dto, CancellationToken ct = default)
         {
-            var status = (dto.Status ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(status))
-            {
-                throw new ArgumentException("Reservation status is required.");
-            }
+            ArgumentNullException.ThrowIfNull(dto);
 
-            var gameId = NormalizeGameId(dto.GameId);
-            if (gameId is not null)
+            if (dto.DurationSeconds <= 0)
             {
-                await EnsureGameExistsAsync(gameId, ct);
-                await EnsureReservationSlotIsFreeAsync(gameId, null, ct);
+                throw new ArgumentException("Duration must be greater than zero.", nameof(dto));
             }
 
             var reservation = new Reservation
             {
-                Status = status,
-                GameId = gameId
+                StartUtc = dto.StartUtc,
+                DurationSeconds = dto.DurationSeconds,
+                Mode = dto.Mode
             };
+
+            await ApplyTableAssignmentsAsync(reservation, dto.TableIds, ct);
 
             _db.Reservations.Add(reservation);
             await _db.SaveChangesAsync(ct);
@@ -67,35 +65,40 @@ namespace Teslow_srv.Service
             return MapToReadDto(reservation);
         }
 
-        public async Task<ReadReservationDto?> UpdateAsync(int id, UpdateReservationDto dto, CancellationToken ct = default)
+        public async Task<ReadReservationDto?> UpdateAsync(Guid id, UpdateReservationDto dto, CancellationToken ct = default)
         {
-            var reservation = await _db.Reservations.FirstOrDefaultAsync(r => r.ReservationId == id, ct);
+            var reservation = await _db.Reservations
+                .Include(r => r.TableAssignments)
+                .FirstOrDefaultAsync(r => r.Id == id, ct);
+
             if (reservation is null)
             {
                 return null;
             }
 
-            if (dto.Status is not null)
+            if (dto.StartUtc.HasValue)
             {
-                var status = dto.Status.Trim();
-                if (string.IsNullOrWhiteSpace(status))
-                {
-                    throw new ArgumentException("Reservation status cannot be empty.");
-                }
-
-                reservation.Status = status;
+                reservation.StartUtc = dto.StartUtc.Value;
             }
 
-            if (dto.GameId is not null)
+            if (dto.DurationSeconds.HasValue)
             {
-                var gameId = NormalizeGameId(dto.GameId);
-                if (gameId is not null)
+                if (dto.DurationSeconds.Value <= 0)
                 {
-                    await EnsureGameExistsAsync(gameId, ct);
-                    await EnsureReservationSlotIsFreeAsync(gameId, reservation.ReservationId, ct);
+                    throw new ArgumentException("Duration must be greater than zero.", nameof(dto));
                 }
 
-                reservation.GameId = gameId;
+                reservation.DurationSeconds = dto.DurationSeconds.Value;
+            }
+
+            if (dto.Mode.HasValue)
+            {
+                reservation.Mode = dto.Mode.Value;
+            }
+
+            if (dto.TableIds is not null)
+            {
+                await ApplyTableAssignmentsAsync(reservation, dto.TableIds, ct);
             }
 
             await _db.SaveChangesAsync(ct);
@@ -103,9 +106,9 @@ namespace Teslow_srv.Service
             return MapToReadDto(reservation);
         }
 
-        public async Task<bool> DeleteAsync(int id, CancellationToken ct = default)
+        public async Task<bool> DeleteAsync(Guid id, CancellationToken ct = default)
         {
-            var reservation = await _db.Reservations.FindAsync([id], ct);
+            var reservation = await _db.Reservations.FirstOrDefaultAsync(r => r.Id == id, ct);
             if (reservation is null)
             {
                 return false;
@@ -116,41 +119,71 @@ namespace Teslow_srv.Service
             return true;
         }
 
-        private static string? NormalizeGameId(string? gameId)
-        {
-            if (string.IsNullOrWhiteSpace(gameId))
-            {
-                return null;
-            }
-
-            return gameId.Trim();
-        }
-
-        private async Task EnsureGameExistsAsync(string gameId, CancellationToken ct)
-        {
-            var exists = await _db.Games.AnyAsync(g => g.GameId == gameId, ct);
-            if (!exists)
-            {
-                throw new ArgumentException($"Unknown game id: {gameId}");
-            }
-        }
-
-        private async Task EnsureReservationSlotIsFreeAsync(string gameId, int? reservationId, CancellationToken ct)
-        {
-            var existing = await _db.Reservations
-                .AnyAsync(r => r.GameId == gameId && r.ReservationId != reservationId, ct);
-
-            if (existing)
-            {
-                throw new ArgumentException($"A reservation already exists for game '{gameId}'.");
-            }
-        }
-
         private static ReadReservationDto MapToReadDto(Reservation reservation) => new()
         {
-            ReservationId = reservation.ReservationId,
-            Status = reservation.Status,
-            GameId = reservation.GameId
+            Id = reservation.Id,
+            StartUtc = reservation.StartUtc,
+            DurationSeconds = reservation.DurationSeconds,
+            Mode = reservation.Mode,
+            CreatedAtUtc = reservation.CreatedAtUtc,
+            TableIds = reservation.TableAssignments.Select(a => a.GameTableId).ToList()
         };
+
+        private async Task ApplyTableAssignmentsAsync(Reservation reservation, IEnumerable<Guid>? tableIds, CancellationToken ct)
+        {
+            if (tableIds is null)
+            {
+                return;
+            }
+
+            var desiredIds = tableIds
+                .Where(id => id != Guid.Empty)
+                .Distinct()
+                .ToList();
+
+            if (desiredIds.Count == 0)
+            {
+                reservation.TableAssignments.Clear();
+                return;
+            }
+
+            var tables = await _db.GameTables
+                .Where(t => desiredIds.Contains(t.Id))
+                .ToListAsync(ct);
+
+            if (tables.Count != desiredIds.Count)
+            {
+                var found = tables.Select(t => t.Id).ToHashSet();
+                var missing = desiredIds.Where(id => !found.Contains(id));
+                throw new ArgumentException($"Unknown game table id(s): {string.Join(", ", missing)}");
+            }
+
+            var currentAssignments = reservation.TableAssignments
+                .Where(a => !desiredIds.Contains(a.GameTableId))
+                .ToList();
+
+            foreach (var assignment in currentAssignments)
+            {
+                reservation.TableAssignments.Remove(assignment);
+            }
+
+            var existingIds = reservation.TableAssignments
+                .Select(a => a.GameTableId)
+                .ToHashSet();
+
+            foreach (var table in tables)
+            {
+                if (existingIds.Add(table.Id))
+                {
+                    reservation.TableAssignments.Add(new GameTableAssignment
+                    {
+                        Reservation = reservation,
+                        ReservationId = reservation.Id,
+                        GameTable = table,
+                        GameTableId = table.Id
+                    });
+                }
+            }
+        }
     }
 }
