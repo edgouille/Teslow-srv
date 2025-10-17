@@ -56,7 +56,7 @@ namespace Teslow_srv.api.Controllers
                 {
                     UserName = request.UserName,
                     Password = request.Password,
-                    Role = string.IsNullOrWhiteSpace(request.Role) ? "User" : request.Role.Trim()
+                    Role = "User"
                 }, ct);
 
                 var token = _tokenService.GenerateToken(new AuthenticatedUserDto

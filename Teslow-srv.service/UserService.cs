@@ -72,7 +72,9 @@ namespace Teslow_srv.Service
 
             var user = new User
             {
-                Id = dto.Id is { } userId and not Guid.Empty ? userId : Guid.NewGuid(),
+                Id = dto.Id.HasValue && dto.Id.Value != Guid.Empty
+                    ? dto.Id.Value
+                    : Guid.NewGuid(),
                 UserName = userName,
                 PasswordHash = HashPassword(password),
                 Role = string.IsNullOrWhiteSpace(dto.Role) ? "User" : dto.Role.Trim()

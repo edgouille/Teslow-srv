@@ -1,0 +1,20 @@
+# Image officielle MariaDB
+FROM mariadb:11.4
+
+# Variables (tu peux override au run)
+ENV MARIADB_ROOT_PASSWORD=rootpass
+ENV MARIADB_DATABASE=teslow_db
+ENV MARIADB_USER=teslow_user
+ENV MARIADB_PASSWORD=teslow_pass
+
+# Copie des scripts d'init SQL (exécutés automatiquement à la 1ère initialisation)
+# Place tes .sql dans ./initdb/ à côté de ce Dockerfile
+COPY init.sql /docker-entrypoint-initdb.d/
+
+EXPOSE 3306
+
+
+#connection string = server=localhost;port=3306;database=teslow_db;user=teslow_user;password=teslow_pass
+
+#build = docker build -f Dockerfile.db -t teslow-db .
+#launch = docker run -d --name mariadb-teslow -e MARIADB_ROOT_PASSWORD=rootpass -e MARIADB_DATABASE=teslow_db -e MARIADB_USER=teslow_user -e MARIADB_PASSWORD=teslow_pass -p 3306:3306 teslow-db 
