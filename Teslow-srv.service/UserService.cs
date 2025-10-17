@@ -31,9 +31,9 @@ namespace Teslow_srv.Service
                 {
                     Id = u.Id,
                     UserName = u.UserName,
-                    DisplayName = u.DisplayName,
-                    CanonicalName = u.CanonicalName,
-                    Age = u.Age,
+                    //DisplayName = u.DisplayName,
+                    //CanonicalName = u.CanonicalName,
+                    //Age = u.Age,
                     Role = u.Role,
                     CreatedAt = u.CreatedAt
                 })
@@ -49,9 +49,9 @@ namespace Teslow_srv.Service
             {
                 Id = u.Id,
                 UserName = u.UserName,
-                DisplayName = u.DisplayName,
-                CanonicalName = u.CanonicalName,
-                Age = u.Age,
+                //DisplayName = u.DisplayName,
+                //CanonicalName = u.CanonicalName,
+                //Age = u.Age,
                 Role = u.Role,
                 CreatedAt = u.CreatedAt
             };
@@ -80,9 +80,9 @@ namespace Teslow_srv.Service
                 ? userName
                 : dto.DisplayName.Trim();
 
-            var canonicalName = string.IsNullOrWhiteSpace(dto.CanonicalName)
-                ? BuildCanonicalName(displayName)
-                : BuildCanonicalName(dto.CanonicalName);
+            //var canonicalName = string.IsNullOrWhiteSpace(dto.CanonicalName)
+            //    ? BuildCanonicalName(displayName)
+            //    : BuildCanonicalName(dto.CanonicalName);
 
             var user = new User
             {
@@ -90,9 +90,8 @@ namespace Teslow_srv.Service
                     ? dto.Id.Value
                     : Guid.NewGuid(),
                 UserName = userName,
-                DisplayName = displayName,
-                CanonicalName = canonicalName,
-                Age = dto.Age,
+                //DisplayName = displayName,
+                //CanonicalName = canonicalName,
                 PasswordHash = HashPassword(password),
                 Role = string.IsNullOrWhiteSpace(dto.Role) ? "User" : dto.Role.Trim()
             };
@@ -104,9 +103,8 @@ namespace Teslow_srv.Service
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                DisplayName = user.DisplayName,
-                CanonicalName = user.CanonicalName,
-                Age = user.Age,
+                //DisplayName = user.DisplayName,
+                //CanonicalName = user.CanonicalName,
                 Role = user.Role,
                 CreatedAt = user.CreatedAt
             };
@@ -131,21 +129,21 @@ namespace Teslow_srv.Service
             if (dto.DisplayName is not null)
             {
                 var normalized = dto.DisplayName.Trim();
-                u.DisplayName = string.IsNullOrWhiteSpace(normalized) ? null : normalized;
+                //u.DisplayName = string.IsNullOrWhiteSpace(normalized) ? null : normalized;
             }
 
-            if (dto.CanonicalName is not null)
-            {
-                var normalized = dto.CanonicalName.Trim();
-                u.CanonicalName = string.IsNullOrWhiteSpace(normalized)
-                    ? null
-                    : BuildCanonicalName(normalized);
-            }
+            //if (dto.CanonicalName is not null)
+            //{
+            //    var normalized = dto.CanonicalName.Trim();
+            //    u.CanonicalName = string.IsNullOrWhiteSpace(normalized)
+            //        ? null
+            //        : BuildCanonicalName(normalized);
+            //}
 
-            if (dto.Age.HasValue)
-            {
-                u.Age = dto.Age.Value;
-            }
+            //if (dto.Age.HasValue)
+            //{
+            //    u.Age = dto.Age.Value;
+            //}
 
             if (!string.IsNullOrWhiteSpace(dto.Password))
             {
@@ -163,9 +161,8 @@ namespace Teslow_srv.Service
             {
                 Id = u.Id,
                 UserName = u.UserName,
-                DisplayName = u.DisplayName,
-                CanonicalName = u.CanonicalName,
-                Age = u.Age,
+                //DisplayName = u.DisplayName,
+                //CanonicalName = u.CanonicalName,
                 Role = u.Role,
                 CreatedAt = u.CreatedAt
             };
@@ -200,7 +197,7 @@ namespace Teslow_srv.Service
                 {
                     Id = user.Id,
                     UserName = user.UserName,
-                    DisplayName = user.DisplayName,
+                    //DisplayName = user.DisplayName,
                     Role = user.Role
                 }
                 : null;

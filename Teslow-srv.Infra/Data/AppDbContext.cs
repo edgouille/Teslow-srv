@@ -27,8 +27,8 @@ namespace Teslow_srv.Infrastructure.Data
             {
                 entity.HasKey(u => u.Id);
                 entity.Property(u => u.UserName).HasMaxLength(100);
-                entity.Property(u => u.DisplayName).HasMaxLength(100);
-                entity.Property(u => u.CanonicalName).HasMaxLength(100);
+                //entity.Property(u => u.DisplayName).HasMaxLength(100);
+                //entity.Property(u => u.CanonicalName).HasMaxLength(100);
             });
 
             modelBuilder.Entity<Game>(entity =>

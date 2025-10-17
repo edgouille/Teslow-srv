@@ -12,8 +12,5 @@ namespace Teslow_srv.Domain.Dto.Auth
         [Required]
         [MinLength(6)]
         public required string Password { get; set; }
-
-        [MaxLength(32)]
-        public string? Role { get; set; }
     }
 }
