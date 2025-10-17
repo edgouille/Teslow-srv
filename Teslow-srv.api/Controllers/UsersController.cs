@@ -19,6 +19,14 @@ namespace Teslow_srv.api.Controllers
             _userService = userService;
         }
 
+        [AllowAnonymous]
+        [HttpGet("leaderboard")]
+        public async Task<ActionResult<IEnumerable<UserLeaderboardDto>>> GetLeaderboard(CancellationToken ct)
+        {
+            var leaderboard = await _userService.GetLeaderboardAsync(ct);
+            return Ok(leaderboard);
+        }
+
         // GET: api/users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GetUserDto>>> GetAll(CancellationToken ct)

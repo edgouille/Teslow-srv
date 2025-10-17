@@ -11,5 +11,6 @@ namespace Teslow_srv.Service.Interface
         Task<GetUserDto?> UpdateAsync(Guid id, UpdateUserDto dto, CancellationToken ct = default);
         Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
         Task<AuthenticatedUserDto?> ValidateCredentialsAsync(string userName, string password, CancellationToken ct = default);
+        Task<List<UserLeaderboardDto>> GetLeaderboardAsync(CancellationToken ct = default);
     }
 }
