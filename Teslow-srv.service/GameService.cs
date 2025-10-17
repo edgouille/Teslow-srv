@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Teslow_srv.Domain.Dto.Game;
 using Teslow_srv.Domain.Entities;
@@ -117,6 +112,34 @@ namespace Teslow_srv.Service
             _db.Games.Remove(game);
             await _db.SaveChangesAsync(ct);
             return true;
+        }
+        public async Task<ReadGameDto> AddScoreAsync(AddScoreGameDto dto, CancellationToken ct = default)
+        {
+            if (dto.Team1 < 0 || dto.Team2 < 0)
+                throw new ArgumentException("Les scores doivent être positifs.");
+
+            if (dto.Duration < 0)
+                throw new ArgumentException("La durée doit être positive.");
+
+            var game = new Game
+            {
+                Score1 = dto.Team1,
+                Score2 = dto.Team2,
+                DurationSeconds = dto.Duration,
+                Date = DateTime.UtcNow
+            };
+
+            _db.Games.Add(game);
+            await _db.SaveChangesAsync(ct);
+
+            return new ReadGameDto
+            {
+                Id = game.Id,
+                Score1 = game.Score1,
+                Score2 = game.Score2,
+                DurationSeconds = game.DurationSeconds,
+                Date = game.Date
+            };
         }
 
         private static void ValidateScores(int score1, int score2)

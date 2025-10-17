@@ -83,5 +83,24 @@ namespace Teslow_srv.api.Controllers
             if (!deleted) return NotFound();
             return NoContent();
         }
+
+        [HttpPost("addScore")]
+        //[Authorize(Roles = "Admin")]
+        [AllowAnonymous]
+        public async Task<IActionResult> AddScore([FromBody] AddScoreGameDto scores, CancellationToken ct)
+        {
+            if (scores is null) return BadRequest("Payload required.");
+
+            try
+            {
+                var created = await _gameService.AddScoreAsync(scores, ct);
+                // 201 avec l’objet créé
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

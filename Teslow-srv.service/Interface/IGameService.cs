@@ -13,5 +13,6 @@ namespace Teslow_srv.Service.Interface
         Task<ReadGameDto> CreateAsync(CreateGameDto dto, CancellationToken ct = default);
         Task<ReadGameDto?> UpdateAsync(Guid id, UpdateGameDto dto, CancellationToken ct = default);
         Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
+        Task<ReadGameDto> AddScoreAsync(AddScoreGameDto dto, CancellationToken ct = default);
     }
 }
