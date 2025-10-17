@@ -40,6 +40,25 @@ namespace Teslow_srv.Service
                 .ToListAsync(ct);
         }
 
+        public async Task<List<UserLeaderboardDto>> GetLeaderboardAsync(CancellationToken ct = default)
+        {
+            return await _db.TeamPlayers
+                .AsNoTracking()
+                .Join(_db.Users.AsNoTracking(), tp => tp.UserId, u => u.Id, (tp, user) => new { tp, user })
+                .Join(_db.TeamMemberships.AsNoTracking(), combined => combined.tp.TeamId, team => team.TeamId,
+                    (combined, team) => new { combined.user, team })
+                .GroupBy(x => new { x.user.Id, x.user.UserName })
+                .Select(g => new UserLeaderboardDto
+                {
+                    UserId = g.Key.Id,
+                    UserName = g.Key.UserName,
+                    Goals = g.Sum(x => x.team.PlayerGoals)
+                })
+                .OrderByDescending(entry => entry.Goals)
+                .ThenBy(entry => entry.UserName)
+                .ToListAsync(ct);
+        }
+
         public async Task<GetUserDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
             var u = await _db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
