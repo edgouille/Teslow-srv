@@ -44,17 +44,18 @@ namespace Teslow_srv.Service
         {
             return await _db.TeamPlayers
                 .AsNoTracking()
-                .Join(_db.Users.AsNoTracking(), tp => tp.UserId, u => u.Id, (tp, user) => new { tp, user })
-                .Join(_db.TeamMemberships.AsNoTracking(), combined => combined.tp.TeamId, team => team.TeamId,
-                    (combined, team) => new { combined.user, team })
-                .GroupBy(x => new { x.user.Id, x.user.UserName })
-                .Select(g => new UserLeaderboardDto
-                {
-                    UserId = g.Key.Id,
-                    UserName = g.Key.UserName,
-                    Goals = g.Sum(x => x.team.PlayerGoals)
-                })
-                .OrderByDescending(entry => entry.Goals)
+                .GroupBy(tp => tp.UserId)
+                .Join(
+                    _db.Users.AsNoTracking(),
+                    grouping => grouping.Key,
+                    user => user.Id,
+                    (grouping, user) => new UserLeaderboardDto
+                    {
+                        UserId = user.Id,
+                        UserName = user.UserName,
+                        GamesPlayed = grouping.Count()
+                    })
+                .OrderByDescending(entry => entry.GamesPlayed)
                 .ThenBy(entry => entry.UserName)
                 .ToListAsync(ct);
         }
