@@ -4,6 +4,7 @@ namespace Teslow_srv.Domain.Dto.Auth
     {
         public Guid Id { get; set; }
         public required string UserName { get; set; }
+        public string? DisplayName { get; set; }
         public string Role { get; set; } = "User";
     }
 }

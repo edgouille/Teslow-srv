@@ -22,17 +22,6 @@ CREATE TABLE IF NOT EXISTS `Games` (
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB;
 
--- PLAYERS (si distincts des Users ; sinon relie directement)
-CREATE TABLE IF NOT EXISTS `Players` (
-  `Id` CHAR(36) NOT NULL,
-  `UserId` CHAR(36) NULL,
-  `DisplayName` VARCHAR(100) NOT NULL,
-  PRIMARY KEY (`Id`),
-  KEY `IX_Players_UserId` (`UserId`),
-  CONSTRAINT `FK_Players_Users_UserId`
-    FOREIGN KEY (`UserId`) REFERENCES `Users` (`Id`) ON DELETE SET NULL
-) ENGINE=InnoDB;
-
 -- TEAM MEMBERSHIP (appartenance d’un user à une équipe “club”)
 CREATE TABLE IF NOT EXISTS `TeamMemberships` (
   `Id` CHAR(36) NOT NULL,
@@ -97,14 +86,14 @@ CREATE TABLE IF NOT EXISTS `GameTeams` (
 CREATE TABLE IF NOT EXISTS `TeamPlayers` (
   `Id` CHAR(36) NOT NULL,
   `TeamId` CHAR(36) NOT NULL,          -- réf GameTeams.Id
-  `PlayerId` CHAR(36) NOT NULL,        -- réf Players.Id
+  `UserId` CHAR(36) NOT NULL,          -- réf Users.Id
   PRIMARY KEY (`Id`),
   KEY `IX_TeamPlayers_TeamId` (`TeamId`),
-  KEY `IX_TeamPlayers_PlayerId` (`PlayerId`),
+  KEY `IX_TeamPlayers_UserId` (`UserId`),
   CONSTRAINT `FK_TeamPlayers_GameTeams_TeamId`
     FOREIGN KEY (`TeamId`) REFERENCES `GameTeams` (`Id`) ON DELETE CASCADE,
-  CONSTRAINT `FK_TeamPlayers_Players_PlayerId`
-    FOREIGN KEY (`PlayerId`) REFERENCES `Players` (`Id`) ON DELETE CASCADE
+  CONSTRAINT `FK_TeamPlayers_Users_UserId`
+    FOREIGN KEY (`UserId`) REFERENCES `Users` (`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- Optionnel: seeds de base

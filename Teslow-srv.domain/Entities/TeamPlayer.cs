@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Teslow_srv.Domain.Entities
@@ -5,10 +6,10 @@ namespace Teslow_srv.Domain.Entities
     [Table("teams_players")]
     public class TeamPlayer
     {
-        [Column("player_id")]
-        public string PlayerId { get; set; } = null!;
+        [Column("user_id")]
+        public Guid UserId { get; set; }
 
-        public Player Player { get; set; } = null!;
+        public User User { get; set; } = null!;
 
         [Column("team_id")]
         public int TeamId { get; set; }
